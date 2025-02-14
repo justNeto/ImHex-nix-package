@@ -1,4 +1,5 @@
 {
+    # This is a Nix Flake that will produce an output package binary executable accesible via nix develop for now. Later I will try to produce a binary and install it somehow on the system...
     description = "Flake for building imhex properly";
 
     inputs = {
@@ -39,6 +40,23 @@
                     dotnetCorePackages.sdk_9_0-bin
             ];
 
+            unpackPhase = ''
+                git clone https://github.com/WerWolv/ImHex --recurse-submodules
+            '';
+
+            configurePhase = ''
+                echo "TODO: configurePhase"
+            '';
+
+            buildPhase = ''
+                echo "TODO: buildPhase"
+            '';
+
+            installPhase = ''
+                echo "TODO: install!"
+            '';
+
+            # Defining environment variables to be used at runtime
             CC="gcc";
             CXX="g++";
             CMAKE_INSTALL_PREFIX = "$out";
