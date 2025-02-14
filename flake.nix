@@ -38,25 +38,29 @@
                     ocamlPackages.magic
                     ocamlPackages.fontconfig
                     dotnetCorePackages.sdk_9_0-bin
-            ];
+                    ];
 
             unpackPhase = ''
                 git clone https://github.com/WerWolv/ImHex --recurse-submodules
-            '';
+                '';
 
             configurePhase = ''
+                mkdir -p ImHex/build
                 echo "TODO: configurePhase"
-            '';
+                '';
 
             buildPhase = ''
-                echo "TODO: buildPhase"
+                cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release ImHex ImHex/build;
+            cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -S ImHex/ -B ImHex/build;
+            ninja -C ImHex/build install;
+            echo "TODO: buildPhase";
             '';
 
             installPhase = ''
                 echo "TODO: install!"
-            '';
+                '';
 
-            # Defining environment variables to be used at runtime
+# Defining environment variables to be used at runtime
             CC="gcc";
             CXX="g++";
             CMAKE_INSTALL_PREFIX = "$out";
