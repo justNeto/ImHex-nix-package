@@ -102,8 +102,7 @@ stdenv.mkDerivation {
     fixupPhase = ''
         runHook preFixup
 
-        # Set the RPATH so that the binary can find libraries at runtime
-        patchelf --set-rpath $out/lib64 $out/bin/imhex
+        patchelf --set-rpath $out/lib64/imhex.so $out/bin/imhex
 
         runHook postFixup
     '';
