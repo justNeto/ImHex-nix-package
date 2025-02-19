@@ -18,7 +18,6 @@
     mbedtls,
     ninja,
     pkg-config,
-    ripgrep,
     stdenv,
     wayland-utils,
     wayland-scanner,
@@ -30,7 +29,7 @@
 stdenv.mkDerivation {
     pname = "ImHex";
     version = "1.37.0";
-    phases = [ "configurePhase" "buildPhase" "installPhase" ];
+    phases = [ "configurePhase" "buildPhase" "installPhase" "fixupPhase" ];
 
     src = fetchFromGitHub {
         owner = "justNeto";
@@ -48,7 +47,7 @@ stdenv.mkDerivation {
         fetchSubmodules = true;
     };
 
-    nativeBuildInputs = [ pkg-config ripgrep ];
+    nativeBuildInputs = [ pkg-config ];
 
     buildInputs = [
         gcc14
@@ -98,6 +97,15 @@ stdenv.mkDerivation {
         ninja -C $BUILD_DIR install
 
         runHook postInstall
+    '';
+
+    fixupPhase = ''
+        runHook preFixup
+
+        # Set the RPATH so that the binary can find libraries at runtime
+        patchelf --set-rpath $out/lib64 $out/bin/imhex
+
+        runHook postFixup
     '';
 
     meta = with lib; {
