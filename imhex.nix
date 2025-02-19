@@ -8,6 +8,7 @@
     dotnet-runtime,
     fontconfig,
     freetype,
+    file, #libmagic
     gcc14,
     glfw,
     glm,
@@ -17,6 +18,7 @@
     mbedtls,
     ninja,
     pkg-config,
+    ripgrep,
     stdenv,
     wayland-utils,
     wayland-scanner,
@@ -28,28 +30,30 @@
 stdenv.mkDerivation {
     pname = "ImHex";
     version = "1.37.0";
-    phases = [ "configPhase" "buildPhase" "installPhase" ];
+    phases = [ "configurePhase" "buildPhase" "installPhase" ];
 
     src = fetchFromGitHub {
-        owner = "WerWolv";
+        owner = "justNeto";
         repo = "ImHex";
-        hash = "sha256-Hh9Ghtt5YYK7+6bxbNCBiulaeJqdx9g9DergPJz/Ncw=";
-        rev = "658d4c4";
+        hash = "sha256-Zio2dpmRfwBuU4IccuS2Tzr6zJJUrCmW/d2AyWbBTZU=";
+        rev = "8e5fb89";
         fetchSubmodules = true;
     };
 
-    imhex_patterns_SOURCE_DIR = fetchFromGitHub {
+    patterns = fetchFromGitHub {
         owner = "WerWolv";
         repo = "ImHex-Patterns";
-        hash = "sha256-2NgMYaG6+XKp0fIHAn3vAcoXXa3EF4HV01nI+t1IL1U=";
+        hash = "sha256-a2T9sCCxU4t1X4lXrnR3/p2xbedKn2w8SLHtFGIwEYI=";
         rev = "375145e";
+        fetchSubmodules = true;
     };
 
-    nativeBuildInputs = [ pkg-config ];
+    nativeBuildInputs = [ pkg-config ripgrep ];
 
     buildInputs = [
         gcc14
         libgcc
+        file
         gtk3
         ninja
         xz
@@ -69,12 +73,13 @@ stdenv.mkDerivation {
     ];
 
     # Set the build environment
-    configPhase = ''
+    configurePhase = ''
         runHook preConfigure
 
         export CC=${gcc14}/bin/gcc
         export CXX=${gcc14}/bin/g++
         export BUILD_DIR=$(mktemp -d)
+        export PATTERNS_DIR=$patterns
 
         runHook postConfigure
     '';
@@ -82,16 +87,15 @@ stdenv.mkDerivation {
     buildPhase = ''
         runHook preBuild
 
-        cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -S $src -B $BUILD_DIR -D IMHEX_OFFLINE_BUILD=ON
+        cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -S $src -B $BUILD_DIR -DIMHEX_OFFLINE_BUILD=ON -DIMHEX_ENABLE_EXTERNAL_PATTERNS=ON -DCMAKE_INSTALL_PREFIX=$out
 
-        run postBuild
+        runHook postBuild
     '';
 
     installPhase = ''
         runHook preInstall
 
         ninja -C $BUILD_DIR install
-        mv $BUILD_DIR/imhex $out
 
         runHook postInstall
     '';
@@ -100,6 +104,6 @@ stdenv.mkDerivation {
         description = "ImHex: A Hex Editor";
         license = licenses.mit;
         platforms = platforms.linux;
-        maintainers = with maintainers; [ justNeto ];
+        maintainers = with maintainers; [ justNeto WerWolv ];
     };
 }
